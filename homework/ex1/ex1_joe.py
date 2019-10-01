@@ -1,3 +1,1 @@
-# exercice 1
-
-#test
+# exercice 1 chapitre 8, ex2, 
