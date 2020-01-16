@@ -48,11 +48,6 @@ class Player:
     def draw(self): #draws the player
         App.screen.blit(self.img, self.rect)
         
-    def collide(self):
-        for enemy in self.enemies:
-            if self.rect.centery-Enemy.y<52 and self.rect.centerx-Enemy.x<15:
-                Game.running = False
-    #defines collisions between player and enemy
     
 class Enemy:
     """The player must avoid the enemies."""
@@ -103,6 +98,12 @@ class App:
         #creates background, player and 3 ennemies
         
         self.running = True
+
+    def collide(self):
+        for enemy in self.enemies:
+            if self.rect.centery-Enemy.y<52 and self.rect.centerx-Enemy.x<15:
+                Game.running = False
+    #defines collisions between player and enemy
         
     def run(self):
         print('run app')
