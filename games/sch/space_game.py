@@ -102,7 +102,7 @@ class App:
     def collide(self):
         for enemy in self.enemies:
             if self.rect.centery-Enemy.y<52 and self.rect.centerx-Enemy.x<15:
-                Game.running = False
+                self.running = False
     #defines collisions between player and enemy
         
     def run(self):
