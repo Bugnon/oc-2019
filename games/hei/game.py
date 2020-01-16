@@ -53,7 +53,7 @@ def Spacegame():
     bulletx = 0
     bullety = 480
     bulletx_change = 0
-    bullety_change = 10
+    bullety_change = 30
     bullet_state = "ready"
 
     #score
@@ -132,9 +132,9 @@ def Spacegame():
             #if keystroke is pressed check whether it is right or left
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
-                    playerx_change = -3
+                    playerx_change = -6
                 if event.key == pygame.K_d:
-                    playerx_change = 3
+                    playerx_change = 6
                 if event.key == pygame.K_SPACE:
                     if bullet_state is "ready":
                         bullet_Sound = mixer.Sound("sounds/laser.wav")
@@ -185,10 +185,10 @@ def Spacegame():
             
             enemyx[i] += enemyx_change[i]
             if enemyx[i] <= 0:
-                enemyx_change[i] = random.randint(1, 4)
+                enemyx_change[i] = random.randint(1, 6)
                 enemyy[i] += enemyy_change[i]
             elif enemyx[i] >= 636:
-                enemyx_change[i] = -random.randint(1, 4)
+                enemyx_change[i] = -random.randint(1, 6)
                 enemyy[i] += enemyy_change[i]
                 
             #collision
