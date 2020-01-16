@@ -2,6 +2,8 @@
 This is a game with a space theme (doc_string).
 It uses oriented-object programming.
 
+To play the game
+
 spaceship image: "Ship concept Sketches"
 by Tano Bonfanti, licensed under CC BY-NC-ND 4.0
 space image: https://www.flaticon.com/authors/freepik
