@@ -1,9 +1,8 @@
 """
-This is a game with a space theme (doc_string).
-It uses object-oriented programming.
+This is a game uses object-oriented programming.
 
 To play the game use the arrows to move around.
-keep your distance from the asteroids, if you touch them you die.
+Keep your distance from the asteroids, if you touch them you die.
 You need to collect the stars to increase your score.
 To restart the game, click on any key at the end of a play.
 You can toggle Fullscreen mode whit escape.
@@ -70,23 +69,19 @@ class Player:
         self.x += self.speed_x
         self.y += self.speed_y
 
-        if self.x > 555:  # don't allow the player to exit the screen
-            self.x = 555
+        if self.x > App.width - 45:  # don't allow the player to exit the screen
+            self.x = App.width - 45
         if self.x < 0:
             self.x = 0
-        if self.y > 355:
-            self.y = 355
+        if self.y > App.height - 45:
+            self.y = App.height - 45
         if self.y < 0:
             self.y = 0
 
-        if self.speed_x > 5:  # don't allow the player to go to fast
-            self.speed_x = 5
-        if self.speed_x < -5:
-            self.speed_x = -5
-        if self.speed_y > 5:
-            self.speed_y = 5
-        if self.speed_y < -5:
-            self.speed_y = -5
+        self.speed_x = min(5, self.speed_x) # don't allow the player to go to fast
+        self.speed_x = max(-5, self.speed_x)
+        self.speed_y = min(5, self.speed_y) 
+        self.speed_y = max(-5, self.speed_y)
 
         if self.speed_x > 0.1:  # slow the player down
             self.speed_x -= 0.15
@@ -133,21 +128,21 @@ class Asteroids:
     def update(self):
         self.x += self.speed_x
         self.y += self.speed_y
-        if self.x < 1:  # make the asteroid bounce one the edge on the screen
+        if self.x <= 0:  # make the asteroid bounce one the edge on the screen
             self.speed_x = -self.speed_x
-        if self.x > 564:
+        if self.x >= App.width - 35:
             self.speed_x = -self.speed_x
-        if self.y < 1:
+        if self.y <= 0:
             self.speed_y = -self.speed_y
-        if self.y > 364:
+        if self.y >= App.height - 35:
             self.speed_y = -self.speed_y
     
     def draw(self):
         App.screen.blit(self.asteroid, (self.x, self.y))
 
     def collision(self, player_x, player_y):  # detect the collision of asteroids whit the player
-        if self.x - 40 < player_x < self.x + 30:
-            if self.y - 40 < player_y < self.y + 30:
+        if self.x - 35 < player_x < self.x + 25:
+            if self.y - 35 < player_y < self.y + 25:
                 return True
 
 
@@ -244,7 +239,7 @@ class App:
             
         self.player.do_event(event)
 
-    def collision(self):  # what the game need to do when a collision occur
+    def collision(self):  # what the game needes to do when a collision occur
         col = self.player.collision(self.star.x, self.star.y)
         if col:
             self.star = Stars()
@@ -260,7 +255,7 @@ class App:
         for stone in self.asteroids:
             stone.update()
             
-    def draw(self):  # draw everything on the screen
+    def draw(self):  # draw everything on screen
         App.screen.blit(self.background, (0, 0))
 
         for i in self.asteroids:

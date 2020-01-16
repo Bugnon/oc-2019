@@ -85,7 +85,7 @@ class Text:
     """Create a text object."""
     
     def __init__(self, text, pos):
-        self.font = pygame.font.SysFont('consolas', 36)
+        self.font = pygame.font.SysFont(None, 36)
         self.rect = Rect(pos, (0, 0))
         self.set(text)
         
