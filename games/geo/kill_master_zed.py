@@ -9,8 +9,10 @@ from pygame.locals import *
 # initialize Pygame
 pygame.init()
 
+size = 1200, 600
+
 # Create the screen
-screen = pygame.display.set_mode((1200, 600))
+screen = pygame.display.set_mode(size)
 
 # Title and Icon
 pygame.display.set_caption('Kill Master Zed')
@@ -45,14 +47,48 @@ win = mixer.Sound('sounds/win_sound.wav')
 win.set_volume(0.6)
 play_win = True
 
+class Player:
+    def __init__(self, x, y, img):
+        self.x = x
+        self.y = y
+        self.dx = 0
+        self.dy = 0
+        self.img = img
+
+    def do_event(self, event):
+        if event.type == KEYDOWN :
+            if event.key == K_LEFT : 
+                player.dx = -0.7
+            elif event.key == K_RIGHT :
+                player.dx = 0.35
+            elif event.key == K_UP :
+                player.dy = -0.5
+            elif event.key == K_DOWN :
+                player.dy = 0.5
+
+        if event.type == KEYUP :
+            if event.key in (K_LEFT, K_RIGHT) :
+                player.dx = 0
+            elif event.key in (K_UP, K_DOWN):
+                player.dy = 0
+
+    def update(self):
+        self.x += self.dx
+        self.x = min(1100, self.x)
+        self.x = max(-200, self.x)
+
+        self.y += self.dy
+        self.y = max(0, self.y)
+        self.y = min(500, self.y)        
+
+    def draw(self):
+        screen.blit(self.img, (self.x, self.y))
 
 # Player
 playerImg = pygame.image.load('images/Captain.png').convert_alpha()
 playerImg = pygame.transform.scale(playerImg,(100,100))
-playerX = 150
-playerY = 250
-playerX_change = 0
-playerY_change = 0
+
+player = Player(150, 250, playerImg)
 
 # Enemy
 enemyImg = []
@@ -137,9 +173,6 @@ def game_over_text():
 def win_text() :
     over_text = over_font.render('YOU WIN', True, (255,215,0))
     screen.blit(over_text,(300,200))
-
-def player(x,y):
-    screen.blit(playerImg,(x,y))
     
 def enemy(x,y, i):
     screen.blit(enemyImg[i],(x,y))
@@ -198,19 +231,9 @@ while running:
             running = False
             pygame.quit()
     
+        player.do_event(event)    
         # Keys
         if event.type == pygame.KEYDOWN :
-        # Player Control
-            #Forward and backwards
-            if event.key == pygame.K_LEFT : 
-                playerX_change = -0.7
-            if event.key == pygame.K_RIGHT :
-                playerX_change = 0.35
-            #Up and down
-            if event.key == pygame.K_UP :
-                playerY_change = -0.5
-            if event.key == pygame.K_DOWN :
-                playerY_change = 0.5
                 
         #Laser Shoot
             if event.key == pygame.K_SPACE :
@@ -218,32 +241,12 @@ while running:
                     laser_Sound = mixer.Sound('sounds/shot.wav')
                     laser_Sound.play()
                     laser_Sound.set_volume(0.2)
-                    laser1Y = playerY
-                    laser2Y = playerY
-                    fire_laser1(laser1X, playerY)
-                    fire_laser2(laser2X, playerY)
-                          
-        if event.type == pygame.KEYUP :
-            if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT :
-                playerX_change = 0
-            if event.key == pygame.K_UP or event.key == pygame.K_DOWN :
-                playerY_change = 0
-                
-            
+                    laser1Y = player.y
+                    laser2Y = player.y
+                    fire_laser1(laser1X, player.y)
+                    fire_laser2(laser2X, player.y)
 
-    
-    # Player Boundaries
-    playerX += playerX_change
-    if playerX >= 1100 :
-        playerX = 1100
-    elif playerX <= -200 :
-        playerX = -200
-        
-    playerY += playerY_change
-    if playerY <= 0 :
-        playerY = 0
-    elif playerY >= 500 :
-        playerY = 500
+    player.update()
     
     for i in range(num_of_enemies) :
         
@@ -341,8 +344,8 @@ while running:
         
     # Laser movement
     if laser1X and laser2X >=1200 :
-        laser1X = playerX
-        laser2X = playerX
+        laser1X = player.x
+        laser2X = player.x
         laser1_state = 'ready'
         laser2_state = 'ready'
     
@@ -353,9 +356,8 @@ while running:
     if laser2_state is 'fire' :
         fire_laser2(laser2X, laser2Y)
         laser2X += laser2X_change
-        
 
-    player(playerX,playerY)
+    player.draw()
     boss(bossX, bossY)
     show_score(textX, textY)
     
