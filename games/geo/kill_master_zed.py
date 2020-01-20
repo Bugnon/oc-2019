@@ -87,23 +87,44 @@ class Player:
 # Player
 playerImg = pygame.image.load('images/Captain.png').convert_alpha()
 playerImg = pygame.transform.scale(playerImg,(100,100))
-
 player = Player(150, 250, playerImg)
 
+class Enemy:
+    def __init__(self, x, y, img, dx=0, dy=0):
+        self.x = x
+        self.y = y
+        self.dx = dx
+        self.dy = dy
+        self.img = img
+
+    def update(self):
+        self.x += self.dx
+        self.x = min(1100, self.x)
+        self.x = max(-200, self.x)
+
+
+        self.y += self.dy
+        self.y = max(0, self.y)
+        self.y = min(500, self.y)
+
+        if self.y <= 0:
+            enemy.dy = 0.1
+        elif enemy.y >= 500 :
+            enemy.dy = -0.1
+
+    def draw(self):
+        screen.blit(self.img, (self.x, self.y))
+
 # Enemy
-enemyImg = []
-enemyX = []
-enemyY = []
-enemyX_change = []
-enemyY_change = []
+enemies = []
 num_of_enemies = 5
 
+enemy_img = pygame.image.load('images/enemy_big.png').convert_alpha()
 for i in range(num_of_enemies) :
-    enemyImg.append(pygame.image.load('images/enemy_big.png').convert_alpha())
-    enemyX.append(random.randint(1200, 1300))
-    enemyY.append(random.randint(0,500))
-    enemyX_change.append(-0.3)
-    enemyY_change.append(0.1)
+    x = random.randint(1200, 1300)
+    y = random.randint(0,500)
+    enemy = Enemy(x, y, -0.3, 0.1, enemy_img)
+    enemies.append(enemy)
     
 # Boss
 bossImg = pygame.image.load('images/boss.png').convert_alpha()
@@ -173,9 +194,6 @@ def game_over_text():
 def win_text() :
     over_text = over_font.render('YOU WIN', True, (255,215,0))
     screen.blit(over_text,(300,200))
-    
-def enemy(x,y, i):
-    screen.blit(enemyImg[i],(x,y))
     
 def boss(x,y) :    
     screen.blit(bossImg,(x,y))
@@ -248,12 +266,13 @@ while running:
 
     player.update()
     
-    for i in range(num_of_enemies) :
-        
+    # for i in range(num_of_enemies) :
+    for enemy in enemies :
+
         # Game Over
-        if enemyX[i] < 0 :
-            for j in range (num_of_enemies) :
-                enemyX[j] = -1000
+        if enemy.x < 0 :
+            for e in enemies :
+                e.x = -1000
             mixer.music.stop()
             if play_no :
                 play_no = False
@@ -269,18 +288,12 @@ while running:
                 no.play(0)
             game_over_text()
             
-        
         #Enemy Movement and Boundaries
-        enemyX[i] += enemyX_change[i]
-        enemyY[i] += enemyY_change[i]
-        if enemyY[i] <= 0 :
-            enemyY_change[i] = 0.1
-        elif enemyY[i] >= 500 :
-            enemyY_change[i] = -0.1
+        enemy.update()
             
         # Collision
-        collision1 = isCollision1(enemyX[i], enemyY[i], laser1X, laser1Y)
-        collision2 = isCollision2(enemyX[i], enemyY[i], laser2X, laser2Y)
+        collision1 = isCollision1(enemy.x, enemy.y, laser1X, laser1Y)
+        collision2 = isCollision2(enemy.y, enemy.y, laser2X, laser2Y)
         if collision1 or collision2 :
             explosion_Sound = mixer.Sound('sounds/Explosion.wav')
             explosion_Sound.play()
@@ -290,17 +303,17 @@ while running:
             laser2X = 150
             laser2_state = 'ready'
             score_value += 1
-            enemyX[i] = random.randint(1200, 1300)
-            enemyY[i] = random.randint(0,500)
+            enemy.x = random.randint(1200, 1300)
+            enemy.y = random.randint(0,500)
 
             # Speed increases each time an enemy is killed
-            enemyX_change[i] -= 0.025
+            enemy.dx -= 0.025
             
         # Spawn Boss if reach a certain score
         if score_value == 50 :
             bossX += bossX_change
-            enemyX[i] = 3000 
-            enemyX_change[i] = 0
+            enemy.x = 3000 
+            enemy.dx = 0
             bossX_change = -0.045
             if health :
                 show_bosshealth()
@@ -340,7 +353,7 @@ while running:
                 play_winmusic = False
 
                        
-        enemy(enemyX[i],enemyY[i], i)
+        enemy.draw()
         
     # Laser movement
     if laser1X and laser2X >=1200 :
