@@ -1,11 +1,12 @@
 """
-This is a game uses object-oriented programming.
+This is a game...
 
 To play the game use the arrows to move around.
-Keep your distance from the asteroids, if you touch them you die.
+Keep your distance from the asteroids, if you touch them you'll die.
 You need to collect the stars to increase your score.
-To restart the game, click on any key at the end of a play.
-You can toggle Fullscreen mode whit escape.
+The objectif is to get the highest score.
+To restart the game, click on any key at the end of a game.
+You can toggle Fullscreen mode with escape.
 
 Creative Commons Attribution license
 Icons:  https://www.flaticon.com/free-icon/ufo_214358
@@ -33,6 +34,9 @@ class Player:
         self.down = 0
         self.right = 0
         self.left = 0
+        self.life = 3
+        self.heart = pygame.image.load('images/heart.png')
+        self.heart = pygame.transform.scale(self.heart, (30, 30))
         self.player = pygame.image.load('images/ship.png')
         self.player = pygame.transform.scale(self.player, (45, 45))
         
@@ -99,6 +103,12 @@ class Player:
     
     def draw(self):
         App.screen.blit(self.player, (self.x, self.y))
+        if self.life == 3:
+            App.screen.blit(self.heart, (90, 10))
+        if self.life >= 2:
+            App.screen.blit(self.heart, (50, 10))
+        if self.life >= 1:
+            App.screen.blit(self.heart, (10, 10))
 
     def collision(self, star_x, star_y):  # detect the collision of the player whit the stars
         if self.x - 35 < star_x < self.x + 45:
