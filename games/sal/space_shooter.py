@@ -10,18 +10,21 @@ WIDTH,HEIGHT: dimensions of the window
 FPS: Frames per second.
 Color Definations
 '''
-end_game=False
-img_dir = path.join(path.dirname(__file__), 'images')
-sound_folder = path.join(path.dirname(__file__), 'sounds')
-WIDTH = 480
-HEIGHT = 600
-FPS = 60
+
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
+
+end_game=False
+img_dir = path.join(path.dirname(__file__), 'images')
+sound_folder = path.join(path.dirname(__file__), 'sounds')
+WIDTH = 480
+HEIGHT = 600
+FPS = 60
+
 pygame.init() # initializing the game
 pygame.mixer.init()  # For sound
 screen = pygame.display.set_mode((WIDTH, HEIGHT)) # defining screen size
@@ -37,7 +40,7 @@ def draw_text(surf, text, size, x, y):
     text_rect.midtop = (x, y)
     surf.blit(text_surface, text_rect)
 '''
-Main Menu.
+Main Menu.0
 '''
 def main_menu():
     global screen
