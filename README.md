@@ -15,7 +15,3 @@ Install pygame in VS Code
 python3 -m pip install --user pygame
 python3 -m pip install --user --upgrade pip
 ```
-
-geo
----
-
