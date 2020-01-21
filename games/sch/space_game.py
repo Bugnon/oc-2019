@@ -2,7 +2,7 @@
 This is a game with a space theme (doc_string).
 It uses oriented-object programming.
 
-To play the game, you have to dodge the squares with the spaceship.
+To play the game
 
 spaceship image: "Ship concept Sketches"
 by Tano Bonfanti, licensed under CC BY-NC-ND 4.0
@@ -16,8 +16,6 @@ from pygame.locals import *
 import random
 import math
 # imports all needed modules
-
-  mainClock = pygame.time.Clock()
 
 class Player:
     """The player can move up and down."""
@@ -103,10 +101,10 @@ class App:
 
     def collide(self):
         for enemy in self.enemies:
-            if player.colliderect(enemy) == True:
-                enemies.remove(enemy)
-    #defines collisions between player and enemies
-
+            if self.rect.centery-Enemy.y<52 and self.rect.centerx-Enemy.x<15:
+                self.running = False
+    #defines collisions between player and enemy
+        
     def run(self):
         print('run app')
         while self.running:
@@ -129,6 +127,7 @@ class App:
         self.player.update()
         for enemy in self.enemies:
             enemy.update()
+            
         #updates the enemies and the player
             
     def draw(self):

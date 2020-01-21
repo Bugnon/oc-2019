@@ -8,9 +8,12 @@ from pygame.locals import *
 
 # initialize Pygame
 pygame.init()
+RED = (255, 0, 0)
+debug = True
+size = 1200, 600
 
 # Create the screen
-screen = pygame.display.set_mode((1200, 600))
+screen = pygame.display.set_mode(size)
 
 # Title and Icon
 pygame.display.set_caption('Kill Master Zed')
@@ -45,119 +48,129 @@ win = mixer.Sound('sounds/win_sound.wav')
 win.set_volume(0.6)
 play_win = True
 
-class MovingObject:
+class Player:
     def __init__(self, x, y, img):
         self.x = x
         self.y = y
-        self.img = img
         self.dx = 0
         self.dy = 0
-
-    def update(self):
-        self.x += self.dx
-        self.y += self.dy
-
-        if self.x >= 1100:
-            self.x = 1100
-        elif self.x <= -200 :
-            self.x = -200
-        
-        if self.y <= 0:
-            self.y = 0
-        elif self.y >= 500:
-            self.y = 500
-
-    def draw(self):
-        screen.blit(self.img, (self.x, self.y))
-
-
-class Player(MovingObject):
+        self.img = img
+        self.rect = Rect((x, y), self.img.get_size())
 
     def do_event(self, event):
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT : 
-                self.dx = -0.7
-            elif event.key == pygame.K_RIGHT :
-                self.dx = 0.35
-            elif event.key == pygame.K_UP :
-                self.dy = -0.5
-            elif event.key == pygame.K_DOWN :
-                self.dy = 0.5
+        if event.type == KEYDOWN :
+            if event.key == K_LEFT : 
+                player.dx = -0.7
+            elif event.key == K_RIGHT :
+                player.dx = 0.35
+            elif event.key == K_UP :
+                player.dy = -0.5
+            elif event.key == K_DOWN :
+                player.dy = 0.5
 
-        elif event.type == pygame.KEYUP :
-            if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT :
-                self.dx = 0
-            elif event.key == pygame.K_UP or event.key == pygame.K_DOWN :
-                self.dy = 0
+        if event.type == KEYUP :
+            if event.key in (K_LEFT, K_RIGHT) :
+                player.dx = 0
+            elif event.key in (K_UP, K_DOWN):
+                player.dy = 0
 
     def update(self):
         self.x += self.dx
-        self.y += self.dy
+        self.x = min(1100, self.x)
+        self.x = max(-200, self.x)
 
-        if self.x >= 1100:
-            self.x = 1100
-        elif self.x <= -200 :
-            self.x = -200
-        
-        if self.y <= 0:
-            self.y = 0
-        elif self.y >= 500:
-            self.y = 500
+        self.y += self.dy
+        self.y = max(0, self.y)
+        self.y = min(500, self.y)
+
+        self.rect.left = self.x
+        self.rect.top = self.y     
 
     def draw(self):
         screen.blit(self.img, (self.x, self.y))
-
+        if debug:
+            pygame.draw.rect(screen, RED, self.rect, 1)
 
 # Player
 playerImg = pygame.image.load('images/Captain.png').convert_alpha()
 playerImg = pygame.transform.scale(playerImg,(100,100))
 player = Player(150, 250, playerImg)
 
+class Enemy:
+    def __init__(self, x, y, dx, dy, img):
+        self.x = x
+        self.y = y
+        self.dx = dx
+        self.dy = dy
+        self.img = img
+        self.rect = Rect((x, y), self.img.get_size())
+
+    def update(self):
+        self.x += self.dx
+        self.x = min(1100, self.x)
+        self.x = max(-200, self.x)
+
+        self.y += self.dy
+        self.y = max(0, self.y)
+        self.y = min(500, self.y)
+
+        if self.y <= 0:
+            self.dy = 0.1
+        elif self.y >= 500:
+            self.dy = -0.1
+
+        self.rect.left = self.x
+        self.rect.top = self.y     
+
+    def draw(self):
+        screen.blit(self.img, (self.x, self.y))
+        if debug:
+            pygame.draw.rect(screen, RED, self.rect, 1)
+
+
 # Enemy
-enemyImg = []
-enemyX = []
-enemyY = []
-enemyX_change = []
-enemyY_change = []
+enemies = []
 num_of_enemies = 5
 
+enemy_img = pygame.image.load('images/enemy_big.png').convert_alpha()
 for i in range(num_of_enemies) :
-    enemyImg.append(pygame.image.load('images/enemy_big.png').convert_alpha())
-    enemyX.append(random.randint(1200, 1300))
-    enemyY.append(random.randint(0,500))
-    enemyX_change.append(-0.3)
-    enemyY_change.append(0.1)
+    x = random.randint(1200, 1300)
+    y = random.randint(0,500)
+    dx = -random.randint(2, 4)/10
+    enemy = Enemy(x, y, dx, 0.1, enemy_img)
+    enemies.append(enemy)
     
 # Boss
 bossImg = pygame.image.load('images/boss.png').convert_alpha()
 bossImg = pygame.transform.scale(bossImg,(530,530))
-boss = MovingObject(1200, 40, bossImg)
-# bossX = 1200
-# bossY = 40
-# bossX_change = 0
+bossX = 1200
+bossY = 40
+bossX_change = 0
+
+class Laser(Enemy):
+    def __init__(self, x, y, dx, dy, img):
+        super().__init__(x, y, dx, dy, img)
+        self.state = 'ready'
+        self.sound = mixer.Sound('sounds/shot.wav')
+
+    def do_event(self, event):
+        global player
+        if event.type == KEYDOWN:
+            if event.key == K_SPACE :
+                # if self.state == 'ready':
+                    self.sound.play()
+                    self.sound.set_volume(0.2)
+                    self.x = player.x
+                    self.y = player.y
 
 # Laser1
-laser1Img = pygame.image.load('images/laser_big.png').convert_alpha()
-laser1Img = pygame.transform.scale(laser1Img,(32,32))
-laser1Img = pygame.transform.rotate(laser1Img,(90))
-laser1X = 150
-laser1Y = 0
-laser1X_change = 6
-laser1Y_change = 0
-laser1_state = 'ready'
-
-# Laser2
-laser2Img = pygame.image.load('images/laser_big.png').convert_alpha()
-laser2Img = pygame.transform.scale(laser2Img,(32,32))
-laser2Img = pygame.transform.rotate(laser2Img,(90))
-laser2X = 150
-laser2Y = 0
-laser2X_change = 6
-laser2Y_change = 0
-laser2_state = 'ready'
+laserImg = pygame.image.load('images/laser_big.png').convert_alpha()
+laserImg = pygame.transform.scale(laserImg,(32,32))
+laserImg = pygame.transform.rotate(laserImg,(90))
+laser = Laser(150, 0, 6, 0, laserImg)
 
 # Score
-score_value = 50
+score_value = 0
 font = pygame.font.SysFont('magneto', 32)
 textX = 10
 textY = 10
@@ -197,35 +210,14 @@ def game_over_text():
 def win_text() :
     over_text = over_font.render('YOU WIN', True, (255,215,0))
     screen.blit(over_text,(300,200))
-
-def player(x,y):
-    screen.blit(playerImg,(x,y))
     
-def enemy(x,y, i):
-    screen.blit(enemyImg[i],(x,y))
+def boss(x,y) :    
+    screen.blit(bossImg,(x,y))
     
-# def boss(x,y) :    
-#     screen.blit(bossImg,(x,y))
-    
-def fire_laser1(x,y):
-    global laser1_state
-    laser1_state = 'fire'
-    screen.blit(laser1Img,(x + 80 ,y - 5))
-    
-def fire_laser2(x,y):
-    global laser2_state
-    laser2_state = 'fire'
-    screen.blit(laser2Img,(x + 80 ,y + 75))
-    
-def isCollision1(enemyX, enemyY, laser1X, laser1Y):
+def isCollision(enemyX, enemyY, laser1X, laser1Y):
     distance = math.sqrt((math.pow(enemyX - laser1X,2)) + (math.pow(enemyY - laser1Y,2)))
-    if distance <= 40 :
-        return True
-    else :
-        return False
-    
-def isCollision2(enemyX, enemyY, laser2X, laser2Y):
-    distance = math.sqrt((math.pow(enemyX - laser2X,2)) + (math.pow(enemyY - laser2Y,2)))
+    if debug:
+        pygame.draw.line(screen, RED, (enemyX, enemyY), (laser1X, laser1Y), 1)
     if distance <= 40 :
         return True
     else :
@@ -254,32 +246,41 @@ while running:
     
     
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+        if event.type == QUIT:
             running = False
             pygame.quit()
+
+        if event.type == KEYDOWN:
+            if event.key == K_d:
+                debug = not debug
     
         player.do_event(event)
-                
-        #Laser Shoot
-            if event.key == pygame.K_SPACE :
-                if laser1_state and laser2_state is 'ready':
-                    laser_Sound = mixer.Sound('sounds/shot.wav')
-                    laser_Sound.play()
-                    laser_Sound.set_volume(0.2)
+        laser.do_event(event)
 
-                    laser1Y = player.y
-                    laser2Y = player.y
-                    fire_laser1(laser1X, player.y)
-                    fire_laser2(laser2X, player.y)
+        # # Keys
+        # if event.type == pygame.KEYDOWN :
+                
+        # #Laser Shoot
+        #     if event.key == pygame.K_SPACE :
+        #         if laser1_state and laser2_state is 'ready':
+        #             laser_Sound = mixer.Sound('sounds/shot.wav')
+        #             laser_Sound.play()
+        #             laser_Sound.set_volume(0.2)
+        #             laser1Y = player.y
+        #             laser2Y = player.y
+        #             fire_laser1(laser1X, player.y)
+        #             fire_laser2(laser2X, player.y)
 
     player.update()
+    laser.update()
     
-    for i in range(num_of_enemies) :
-        
+    # for i in range(num_of_enemies) :
+    for enemy in enemies :
+
         # Game Over
-        if enemyX[i] < 0 :
-            for j in range (num_of_enemies) :
-                enemyX[j] = -1000
+        if enemy.x < 0 :
+            for e in enemies :
+                e.x = -1000
             mixer.music.stop()
             if play_no :
                 play_no = False
@@ -287,47 +288,41 @@ while running:
             game_over_text()
             break
 
-        if boss.x < 0 :
-            boss.dx = -1
+        if bossX < 0 :
+            bossX_change = -1
             mixer.music.stop()
             if play_no :
                 play_no = False
                 no.play(0)
             game_over_text()
             
-        
         #Enemy Movement and Boundaries
-        enemyX[i] += enemyX_change[i]
-        enemyY[i] += enemyY_change[i]
-        if enemyY[i] <= 0 :
-            enemyY_change[i] = 0.1
-        elif enemyY[i] >= 500 :
-            enemyY_change[i] = -0.1
+        enemy.update()
             
         # Collision
-        collision1 = isCollision1(enemyX[i], enemyY[i], laser1X, laser1Y)
-        collision2 = isCollision2(enemyX[i], enemyY[i], laser2X, laser2Y)
-        if collision1 or collision2 :
+        collision = isCollision(enemy.x, enemy.y, laser.x, laser.y)
+        # collision2 = isCollision2(enemy.x, enemy.y, laser2.x, laser2.y)
+        if collision :
             explosion_Sound = mixer.Sound('sounds/Explosion.wav')
             explosion_Sound.play()
             explosion_Sound.set_volume(0.2)
-            laser1X = 150
-            laser1_state = 'ready'
-            laser2X = 150
-            laser2_state = 'ready'
+            laser.x = 150
+            laser.state = 'ready'
+            # laser2.x = 150
+            # laser2.state = 'ready'
             score_value += 1
-            enemyX[i] = random.randint(1200, 1300)
-            enemyY[i] = random.randint(0,500)
+            enemy.x = random.randint(1200, 1300)
+            enemy.y = random.randint(0,500)
 
             # Speed increases each time an enemy is killed
-            enemyX_change[i] -= 0.025
+            enemy.dx -= 0.025
             
         # Spawn Boss if reach a certain score
         if score_value == 50 :
-            boss.update()
-            enemyX[i] = 3000 
-            enemyX_change[i] = 0
-            boss.dx = -0.045
+            bossX += bossX_change
+            enemy.x = 3000 
+            enemy.dx = 0
+            bossX_change = -0.045
             if health :
                 show_bosshealth()
             if message :
@@ -341,21 +336,21 @@ while running:
                 # boss_music = mixer.music.play()
 
             #Boss Collision
-            collisionboss1 = isCollisionBoss1(boss.x, boss.y, laser1X, laser1Y)
-            collisionboss2 = isCollisionBoss2(boss.x, boss.y, laser2X, laser2Y)
+            collisionboss1 = isCollisionBoss1(bossX, bossY, laser1.x, laser1.y)
+            collisionboss2 = isCollisionBoss2(bossX, bossY, laser2.x, laser2.y)
             if collisionboss1 or collisionboss2 :
                 boss_sound = mixer.Sound('sounds/boss_sound.wav')
                 boss_sound.play()
-                laser1X = 150
-                laser1_state = 'ready'
-                laser2X = 150
-                laser2_state = 'ready'
+                laser.x = 150
+                laser.state = 'ready'
+                # laser2.x = 150
+                # laser2.state = 'ready'
                 bosshealth -= bosshealth_change
                 bosshealth_change = 1
                 
         #Dispawn Boss if Health < 0        
         if bosshealth < 0 :
-            boss.x = 4000
+            bossX = 4000
             win_text()
             message = False
             health = False
@@ -366,29 +361,27 @@ while running:
                 play_winmusic = False
 
                        
-        enemy(enemyX[i],enemyY[i], i)
+        enemy.draw()
         
     # Laser movement
-    if laser1X and laser2X >=1200 :
-        # laser1X = playerX
-        # laser2X = playerX
-        laser1X = player.x
-        laser2X = player.x
+    if laser.x >= 1200 :
+        laser.x = player.x
+        # laser2.x = player.x
+        laser.state = 'ready'
+        # laser2.state = 'ready'
+    
+    
+    # if laser1.state is 'fire' :
+    #     laser1.fire()
+    #     fire_laser1(laser1X, laser1Y)
+    #     laser1X += laser1X_change
+    # if laser2_state is 'fire' :
+    #     fire_laser2(laser2X, laser2Y)
+    #     laser2X += laser2X_change
 
-        laser1_state = 'ready'
-        laser2_state = 'ready'
-    
-    
-    if laser1_state is 'fire' :
-        fire_laser1(laser1X, laser1Y)
-        laser1X += laser1X_change
-    if laser2_state is 'fire' :
-        fire_laser2(laser2X, laser2Y)
-        laser2X += laser2X_change
-        
     player.draw()
-    boss.draw()
-    
+    laser.draw()
+    boss(bossX, bossY)
     show_score(textX, textY)
     
     pygame.display.update()

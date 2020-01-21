@@ -102,9 +102,6 @@ def main():
         if game_state == GameState.TITLE:
 
             game_state = title_screen(screen)
-        
-        if game_state == GameState.SECRET:
-            game_state = secret(screen)
 
         if game_state == GameState.NEWGAME:
             player = Player()
@@ -144,34 +141,7 @@ def title_screen(screen):
         text="Quit",
         action=GameState.QUIT,)
 
-    secret_btn = UIElement(
-        center_position=(538, 373),
-        font_size=30,
-        bg_rgb=WHITE,
-        text_rgb=WHITE,
-        text=".",
-        action=GameState.SECRET,)
-
-    buttons = RenderUpdates(title_btn, start_btn, quit_btn, secret_btn)
-
-    return game_loop(screen, buttons)
-
-def secret(screen):
-    title_btn = UIElement(center_position=(350, 100),
-        font_size=30,
-        bg_rgb=BLACK,
-        text_rgb=WHITE,
-        text="stay here and enjoy the music :)")
-
-    quit_btn = UIElement(
-        center_position=(500, 550),
-        font_size=20,
-        bg_rgb=BLACK,
-        text_rgb=WHITE,
-        text="return to the menu",
-        action=GameState.TITLE,)
-
-    buttons = RenderUpdates(title_btn, quit_btn)
+    buttons = RenderUpdates(title_btn, start_btn, quit_btn)
 
     return game_loop(screen, buttons)
 
@@ -238,7 +208,6 @@ class GameState(Enum):
     TITLE = 0
     NEWGAME = 1
     NEXT_LEVEL = 2
-    SECRET = 3
 
 
 if __name__ == "__main__":
