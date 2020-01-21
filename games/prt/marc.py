@@ -75,9 +75,9 @@ class Player:
   
 class Enemy:
     """The player must avoid the enemies."""
-
+    ENEMY_ZONE = 10000
     def __init__(self):
-        self.x = random.randint(0, 10000)
+        self.x = random.randint(0, self.ENEMY_ZONE)
         self.y = random.randint(0 , App.HEIGHT)
         self.w = 30
         self.h = 30
@@ -90,7 +90,6 @@ class Enemy:
         
     
     def draw(self):
-        #  pygame.draw.rect(App.screen, self.color, self.rect)
         app.camera.draw_rect(self)
     
 
@@ -124,7 +123,6 @@ class Bullet:
         self.x += self.dx * app.clock.get_time()
         self.y += self.dy
         self.time -= 1 * app.clock.get_time()/1000
-        print(app.clock.get_time())
         if self.time < 0:
             self.remove()
         self.rect = Rect(self.x, self.y, self.w, self.h)
@@ -133,7 +131,6 @@ class Bullet:
         
     
     def draw(self):
-        #pygame.draw.rect(App.screen, self.color, self.rect)
         app.camera.draw_rect(self)
     
     @staticmethod   
@@ -175,7 +172,6 @@ class BulletBoss(Bullet):
     
     def collide(self):
         if self.rect.colliderect(app.player.rect):
-            print("boss attack")
             app.player.damage()
             self.remove()
         
@@ -295,7 +291,7 @@ class Text:
 
 class Input():
     """
-    keep in memory the keys press
+    Keep in memory the keys press
     """
     def __init__ (self):
         self.__input = {
@@ -350,7 +346,6 @@ class Camera():
     
     def draw_rect_player(self, other):
         r = other.rect
-        print("camera.self.x", self.x)
         #if r.left > App.WIDTH/2:
         self.x = r.left-App.WIDTH/4
         rect_s = Rect(r.left - self.x, r.top - self.y, r.width,
@@ -365,9 +360,9 @@ class Boss(Enemy):
     def __init__(self):
         super().__init__()
         self.x = 10100
-        self.y = App.HEIGHT/2 - 300/2
-        self.w = 300
         self.h = 300
+        self.y = App.HEIGHT/2 - self.h/2
+        self.w = 300
         self.dx = 0
         self.dy = 0
         self.color = Color("blue")
