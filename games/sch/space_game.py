@@ -17,8 +17,6 @@ import random
 import math
 # imports all needed modules
 
-  mainClock = pygame.time.Clock()
-
 class Player:
     """The player can move up and down."""
     def __init__(self):
